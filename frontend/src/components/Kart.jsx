@@ -1,8 +1,15 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { fetchPriser, fetchBydelDetaljer } from '../api';
 import { fmt, tempoTag, prisColor, liggetidColor } from '../utils';
+
+const tileSets = {
+  midnight: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  cyberpunk: 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+  frost: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+  terminal: 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+};
 
 function FlyTo({ center, zoom }) {
   const map = useMap();
@@ -12,7 +19,7 @@ function FlyTo({ center, zoom }) {
   return null;
 }
 
-export default function Kart() {
+export default function Kart({ theme = 'midnight' }) {
   const [data, setData] = useState([]);
   const [metric, setMetric] = useState('pris');
   const [boligtype, setBoligtype] = useState('alle');
@@ -85,8 +92,10 @@ export default function Kart() {
         <div className="map-container">
           <MapContainer center={[59.92, 10.77]} zoom={12} className="map-wrapper" style={{ height: 550, borderRadius: 8 }}>
             <TileLayer
-              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              key={theme}
+              url={tileSets[theme] || tileSets.midnight}
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>'
+              className={theme === 'terminal' ? 'terminal-tiles' : theme === 'cyberpunk' ? 'cyberpunk-tiles' : ''}
             />
             {flyTarget && <FlyTo center={flyTarget} zoom={14} />}
             {data.map(b => (
